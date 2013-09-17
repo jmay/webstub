@@ -130,6 +130,20 @@ describe WebStub::API do
             @response.body.should == '{"results":["result 1","result 2"]}'
           end
         end
+
+        describe "and to_return receives a block" do
+          before do
+            stub = WebStub::API.stub_request(:post, @url).
+              with(body: "payload-goes-here").
+              to_return { |req| "#{req[:body].length}" }
+
+            @response = post @url, "payload-goes-here"
+          end
+
+          it "returns the correct body" do
+            @response.body.should == '17'
+          end
+        end
       end
 
       describe "with raw data" do

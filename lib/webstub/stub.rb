@@ -15,6 +15,7 @@ module WebStub
 
       @response_body = ""
       @response_delay = 0.0
+      @response_block = nil
       @response_error = nil
       @response_headers = {}
       @response_status_code = 200
@@ -70,7 +71,7 @@ module WebStub
       @requests > 0
     end
 
-    attr_reader :response_body
+    # attr_reader :response_body
     attr_reader :response_delay
     attr_reader :response_error
     attr_reader :response_headers
@@ -88,7 +89,7 @@ module WebStub
       self
     end
 
-    def to_return(options)
+    def to_return(options = {}, &block)
       if status_code = options[:status_code]
         @response_status_code = status_code
       end
@@ -116,7 +117,22 @@ module WebStub
         @response_delay = delay
       end
 
+      if block
+        @response_block = block
+      end
+
       self
+    end
+
+    def response_body
+      if block = @response_block
+        block.call({
+                     body: @request_body,
+                     headers: @request_headers
+                   })
+      else
+        @response_body
+      end
     end
 
     def to_redirect(options)
